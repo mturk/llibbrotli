@@ -529,7 +529,7 @@ BROTLI_MIN_MAX(size_t) BROTLI_MIN_MAX(uint32_t) BROTLI_MIN_MAX(uint8_t)
 #if BROTLI_GNUC_HAS_BUILTIN(__builtin_ctzll, 3, 4, 0) || \
     BROTLI_INTEL_VERSION_CHECK(16, 0, 0)
 #define BROTLI_TZCNT64 __builtin_ctzll
-#elif BROTLI_MSVC_VERSION_CHECK(12, 0, 0)
+#elif BROTLI_MSVC_VERSION_CHECK(16, 0, 0)
 #if defined(BROTLI_TARGET_X64)
 #define BROTLI_TZCNT64 _tzcnt_u64
 #else /* BROTLI_TARGET_X64 */
