@@ -42,15 +42,18 @@ CLOPTS  = /c /nologo $(CRT_CFLAGS) -W3 -O2 -Ob2
 RFLAGS  = /l 0x409 /n /d NDEBUG /d WIN32 /d WINNT /d WINVER=$(WINVER)
 RFLAGS  = $(RFLAGS) /d _WIN32_WINNT=$(WINVER) $(EXTRA_RFLAGS)
 LDLIBS  = kernel32.lib $(EXTRA_LIBS)
+
 !IF DEFINED(_PDB)
 PDBNAME = -Fd$(WORKDIR)\$(PROJECT)
 OUTPDB  = /pdb:$(WORKDIR)\$(PROJECT).pdb
 CLOPTS  = $(CLOPTS) -Zi
 LDFLAGS = $(LDFLAGS) /DEBUG
 !ENDIF
+
 !IF DEFINED(_VENDOR_SFX)
 RFLAGS = $(RFLAGS) /d _VENDOR_SFX=$(_VENDOR_SFX)
 !ENDIF
+
 !IF DEFINED(_VENDOR_NUM)
 RFLAGS = $(RFLAGS) /d _VENDOR_NUM=$(_VENDOR_NUM)
 !ENDIF
@@ -102,7 +105,7 @@ OBJECTS = $(OBJECTS) $(WORKDIR)\llibbrotli.res
 
 all : $(WORKDIR) $(OUTPUT)
 
-$(WORKDIR) :
+$(WORKDIR):
 	@-md $(WORKDIR)
 
 {$(SRCDIR)\c\common}.c{$(WORKDIR)}.obj:
@@ -117,11 +120,11 @@ $(WORKDIR) :
 {$(SRCDIR)}.rc{$(WORKDIR)}.res:
 	$(RC) $(RFLAGS) /fo $@ $<
 
-$(OUTPUT): $(WORKDIR) $(OBJECTS)
+$(OUTPUT): $(OBJECTS)
 !IF "$(TARGET)" == "dll"
-	$(LN) $(LDFLAGS) $(OBJECTS) $(LDLIBS) $(OUTPDB) /out:$(OUTPUT)
+	$(LN) $(LDFLAGS) $** $(LDLIBS) $(OUTPDB) /out:$(OUTPUT)
 !ELSE
-	$(AR) $(ARFLAGS) $(OBJECTS) /out:$(OUTPUT)
+	$(AR) $(ARFLAGS) $** /out:$(OUTPUT)
 !ENDIF
 
 !IF !DEFINED(PREFIX) || "$(PREFIX)" == ""
@@ -131,13 +134,17 @@ install:
 	@echo.
 	@exit /B 1
 !ELSE
-install : all
+install: all
 	@-md "$(PREFIX)" 2>NUL
 !IF "$(TARGET)" == "dll"
 	@xcopy /I /Y /Q "$(WORKDIR)\*.dll" "$(PREFIX)\bin"
-!ENDIF
 !IF DEFINED(_PDB)
 	@xcopy /I /Y /Q "$(WORKDIR)\*.pdb" "$(PREFIX)\bin"
+!ENDIF
+!ELSE
+!IF DEFINED(_PDB)
+	@xcopy /I /Y /Q "$(WORKDIR)\*.pdb" "$(PREFIX)\$(_LIB)"
+!ENDIF
 !ENDIF
 	@xcopy /I /Y /Q "$(WORKDIR)\*.lib" "$(PREFIX)\$(_LIB)"
 	@xcopy /I /Y /Q "$(SRCDIR)\c\include\brotli\*.h" "$(PREFIX)\include\brotli"
